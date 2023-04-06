@@ -9,5 +9,5 @@ fn main() {
         .file("LFMF/src/ValidateInputs.cpp")
         .file("LFMF/src/WiRoot.cpp")
         .file("LFMF/src/wofz.cpp")
-        .compile("liblfmf.a");
+        .compile("lfmf");
 }
