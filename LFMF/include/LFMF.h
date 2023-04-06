@@ -10,7 +10,7 @@
 #include <complex>
 
 // Export the DLL functions as "C" and not C++
-#define DLLEXPORT extern "C" __declspec(dllexport)
+//#define DLLEXPORT extern "C" __declspec(dllexport) // Don't need this on Linux
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define DIM(x, y) (((x) > (y)) ? (x - y) : (0))
@@ -79,6 +79,7 @@ struct Result
 
 //////////////////////////////////////
 // Main LFMF Function
+// Used to use the DLLEXPORT macro, switched it to extern "C" for usage in Linux
 
 extern "C" int LFMF(double h_tx__meter, double h_rx__meter, double f__mhz, double P_tx__watt,
     double N_s, double d__km, double epsilon, double sigma, int pol, Result *result);

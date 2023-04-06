@@ -65,7 +65,8 @@ double ResidueSeries(double d__km, double k, double h_1__km, double h_2__km, dou
         W[i] /= (T[i] - (q*q)); // H_1(h_1)*H_1(h_2)/(t_i-q^2) eqn.26 from NTIA report 99-368
         G = W[i] * exp(-1.0*j*x*T[i]); // sum of exp(-j*x*t_i)*W[i] eqn.26 from NTIA report 99-368
         GW += G; // sum the series
-        
+
+//        Disabled this heuristic due to it being too sensitive
 //        if (i != 0)
 //        {
 //            if (((abs((GW*GW).real())) + (abs((GW*GW).imag()))) == 0)     // when the ground wave is too small, close to 0

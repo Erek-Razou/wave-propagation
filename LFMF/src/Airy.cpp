@@ -571,7 +571,7 @@ complex<double> Airy(complex<double> Z, int kind, int scaling)
     if ((ZU.real() >= -6.5) && (ZU.real() <= 7.5) && (ZU.imag() <= 6.35)) {
 
         // choose center of expansion of the Taylor series
-        CoERealidx = (int)(ZU.real() + copysign(0.5, ZU.real()));
+        CoERealidx = (int)(ZU.real() + copysign(0.5, ZU.real())); // This copysign used to be a Windows only version of the function, I don't know why, but switched it to a standard one instead for portability
         CoEImagidx = (int)(sin(PI / 3.0) * (ZU.imag() + 0.5)); // sin(60)*(Z.imag()+0.5)
 
         N = NQTT[CoERealidx + 6] + CoEImagidx;  // N is index of center of expansion
