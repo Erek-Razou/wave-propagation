@@ -1,7 +1,9 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+use std::error::Error;
 use std::ffi::{c_double, c_int};
+use std::fmt::{Display, Formatter};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -56,6 +58,14 @@ pub struct LFMF_Error {
     pub status: i32,
     pub message: String,
 }
+
+impl Display for LFMF_Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl Error for LFMF_Error {}
 
 pub fn calc_LFMF(parameters: LFMF_Parameters) -> Result<LFMF_Result, LFMF_Error> {
     let mut c_result = c_Result {
@@ -123,7 +133,7 @@ pub fn calc_LFMF(parameters: LFMF_Parameters) -> Result<LFMF_Result, LFMF_Error>
         1005 => Err(LFMF_Error {
             status,
             message: format!(
-                "Path distance is {} which is out of the range d__km <= 10000.",
+                "Path distance is {} which is out of the range 0.001 <= d__km <= 10000.",
                 { parameters.d__km }
             ),
         }),
