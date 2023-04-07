@@ -12,9 +12,6 @@ pub struct Cli {
     /// Minimum usable field strength in dB(uV)/m.
     pub min_field_strength: f64,
 
-    /// Maximum search distance in km.
-    pub max_search_distance: f64,
-
     //// Input json file as described in the README or other sources.
     // #[arg(value_parser = parse_input_path)]
     // pub input_file: PathBuf,
