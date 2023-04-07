@@ -15,9 +15,10 @@ pub fn find_max_distance(
     mut lfmf_parameters: LFMF_Parameters,
     max_search_distance: f64,
 ) -> Result<f64, Box<dyn Error>> {
-    const TOLERANCE: f64 = 0.0001;
+    const FIELD_STRENGTH_DB_TOLERANCE: f64 = 0.0001;
+    const MINIMUM_STEP: f64 = 0.0001; // An accuracy of 10 cm is way more than enough given how approximated the results of LFMF are
     let lower_bound = min_usable_field_strength;
-    let upper_bound = min_usable_field_strength + TOLERANCE;
+    let upper_bound = min_usable_field_strength + FIELD_STRENGTH_DB_TOLERANCE;
 
     lfmf_parameters.d__km = max_search_distance;
     let mut current_field_strength = calc_LFMF(lfmf_parameters)?.E_dBuVm;
@@ -25,6 +26,7 @@ pub fn find_max_distance(
         return Err("The distance where the minimum field strength value is at is greater than the maximum search distance".into());
     }
 
+    // First we'll try to do a "binary search" for the position where the field strength is at using the tolerance.
     let mut step = lfmf_parameters.d__km / 2.0;
     while current_field_strength < lower_bound || upper_bound < current_field_strength {
         if current_field_strength < lower_bound {
@@ -32,8 +34,18 @@ pub fn find_max_distance(
         } else {
             lfmf_parameters.d__km += step;
         }
+        current_field_strength = calc_LFMF(lfmf_parameters)?.E_dBuVm;
         step /= 2.0;
+        if step < MINIMUM_STEP {
+            break; // Binary search failed probably due to the discontinuity at the point where LFMF switches calculation methods.
+        }
+    }
+
+    // Check if the binary search failed and adjust closer to the transmitter until the minimum field strength is reached.
+    while current_field_strength < lower_bound {
+        lfmf_parameters.d__km -= MINIMUM_STEP;
         current_field_strength = calc_LFMF(lfmf_parameters)?.E_dBuVm;
     }
+
     Ok(lfmf_parameters.d__km)
 }
