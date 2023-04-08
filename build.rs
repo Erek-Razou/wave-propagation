@@ -1,7 +1,6 @@
 fn main() {
     cc::Build::new()
         .cpp(true)
-        .file("LFMF/include/LFMF.h")
         .file("LFMF/src/Airy.cpp")
         .file("LFMF/src/FlatEarthCurveCorrection.cpp")
         .file("LFMF/src/LFMF.cpp")
