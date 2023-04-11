@@ -2,24 +2,26 @@ use crate::lfmf::LFMF_Parameters;
 
 #[derive(Debug, Clone, Copy)]
 pub struct LineSegment {
-    pub lfmf_parameters: LFMF_Parameters,
-    /// The distance in km from the transmitter to where the segment ends.
-    /// It's specified in such a way for easier definition for a human when combining multiple segments to a line.
-    pub end_distance_km: f64,
+    /// In contained is the distance in km that the segment spans.
+    lfmf_parameters: LFMF_Parameters,
 }
-impl PartialEq for LineSegment {
-    fn eq(&self, other: &Self) -> bool {
-        self.end_distance_km.eq(&other.end_distance_km)
+
+impl LineSegment {
+    pub fn new(lfmf_parameters: LFMF_Parameters) -> Self {
+        Self { lfmf_parameters }
     }
-}
-impl PartialOrd for LineSegment {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.end_distance_km.partial_cmp(&other.end_distance_km)
+    pub fn with_length(mut lfmf_parameters: LFMF_Parameters, length_km: f64) -> Self {
+        lfmf_parameters.d__km = length_km;
+        Self { lfmf_parameters }
     }
-}
-impl Eq for LineSegment {}
-impl Ord for LineSegment {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.end_distance_km.total_cmp(&other.end_distance_km)
+
+    pub fn lfmf_parameters(&self) -> LFMF_Parameters {
+        self.lfmf_parameters
+    }
+    pub fn length_km(&self) -> f64 {
+        self.lfmf_parameters.d__km
+    }
+    pub fn set_length_km(&mut self, distance_km: f64) {
+        self.lfmf_parameters.d__km = distance_km;
     }
 }

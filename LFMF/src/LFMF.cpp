@@ -67,12 +67,12 @@ int LFMF(double h_tx__meter, double h_rx__meter, double f__mhz, double P_tx__wat
     double d_test__km = 80 * pow(f__mhz, -THIRD);
 
     double E_gw;
-    if (d__km < d_test__km)
-    {
-        E_gw = FlatEarthCurveCorrection(delta, q, h_1__km, h_2__km, d__km, k, a_e__km);
-        result->method = METHOD__FLAT_EARTH_CURVE;
-    }
-    else
+//    if (d__km < d_test__km)
+//    {
+//        E_gw = FlatEarthCurveCorrection(delta, q, h_1__km, h_2__km, d__km, k, a_e__km);
+//        result->method = METHOD__FLAT_EARTH_CURVE;
+//    }
+//    else
     {
         E_gw = ResidueSeries(d__km, k, h_1__km, h_2__km, nu, theta__rad, q);
         result->method = METHOD__RESIDUE_SERIES;

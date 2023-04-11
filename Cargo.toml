@@ -7,6 +7,8 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+rayon = "1"
+textplots = "0.8"
 
 [build-dependencies]
 cc = "1"
