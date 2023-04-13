@@ -1,10 +1,10 @@
 use crate::lfmf::calc_LFMF;
 use crate::terrain::{Line, LineSegment};
-use std::error::Error;
+use anyhow::{bail, Context, Result};
 
 fn calc_one_way_field_strength_for_segments<'a, I: Iterator<Item = &'a LineSegment>>(
     segments: I,
-) -> Result<f64, Box<dyn Error>> {
+) -> Result<f64> {
     let mut field_strength = 0.0;
     let mut old_distance = 0.0;
     for segment in segments {
@@ -12,28 +12,48 @@ fn calc_one_way_field_strength_for_segments<'a, I: Iterator<Item = &'a LineSegme
         let mut parameters = segment.lfmf_parameters();
         if old_distance != 0.0 {
             parameters.d__km = old_distance;
-            field_strength -= calc_LFMF(parameters)?.E_dBuVm;
+            field_strength -= calc_LFMF(parameters)
+                .with_context(|| {
+                    format!("Failed to calculate field_strength for parameters {parameters:?}.")
+                })?
+                .E_dBuVm;
         }
         parameters.d__km = new_distance;
-        field_strength += calc_LFMF(parameters)?.E_dBuVm;
+        field_strength += calc_LFMF(parameters)
+            .with_context(|| {
+                format!("Failed to calculate field_strength for parameters {parameters:?}.")
+            })?
+            .E_dBuVm;
         old_distance = new_distance;
     }
     Ok(field_strength)
 }
 
-pub fn calc_field_strength_for_line_at_km(
-    line: &Line,
-    distance: f64,
-) -> Result<f64, Box<dyn Error>> {
-    let segments = line.segments_until(distance).ok_or(format!(
-        "Could not get segments for distance of {distance} km in line {line:?}"
-    ))?;
+pub fn calc_field_strength_for_line_at_km(line: &Line, distance: f64) -> Result<f64> {
+    let segments = line.segments_until(distance).with_context(|| {
+        format!("Could not get segments for distance of {distance} km in line {line:?}")
+    })?;
     match segments.len() {
-        0 => Err("Got 0 segments for distance of {distance} km in line {line:?}".into()),
-        1 => Ok(calc_LFMF(segments[0].lfmf_parameters())?.E_dBuVm),
+        0 => bail!("Got 0 segments for distance of {distance} km in line {line:?}"),
+        1 => Ok(calc_LFMF(segments[0].lfmf_parameters())
+            .with_context(|| {
+                format!(
+                    "Could not calculate field strength for segment {:?}",
+                    segments[0]
+                )
+            })?
+            .E_dBuVm),
         _ => {
-            let field_strength1 = calc_one_way_field_strength_for_segments(segments.iter())?;
-            let field_strength2 = calc_one_way_field_strength_for_segments(segments.iter().rev())?;
+            let field_strength1 = calc_one_way_field_strength_for_segments(segments.iter())
+                .with_context(|| {
+                    format!(
+                        "Could not calculate forwards way field strength for segments {segments:?}."
+                    )
+                })?;
+            let field_strength2 = calc_one_way_field_strength_for_segments(segments.iter().rev())
+                .with_context(|| {
+                format!("Could not calculate reverse way field strength for segments {segments:?}.")
+            })?;
             let field_strength_final = (field_strength1 + field_strength2) * 0.5;
             Ok(field_strength_final)
         }
@@ -48,10 +68,7 @@ pub fn calc_field_strength_for_line_at_km(
 ///
 /// # Returns
 /// A result of either the maximum distance in km where the field strength doesn't fall below the minimum or an error.
-pub fn find_max_distance_for_line(
-    min_usable_field_strength: f64,
-    line: &Line,
-) -> Result<f64, Box<dyn Error>> {
+pub fn find_max_distance_for_line(min_usable_field_strength: f64, line: &Line) -> Result<f64> {
     const FIELD_STRENGTH_DB_TOLERANCE: f64 = 0.0001;
     const MINIMUM_STEP: f64 = 0.0001; // An accuracy of 10 cm should be way more than enough given how approximated the results of LFMF are
     let upper_bound = min_usable_field_strength + FIELD_STRENGTH_DB_TOLERANCE;
@@ -63,7 +80,7 @@ pub fn find_max_distance_for_line(
     let mut current_distance = 0.0;
     for segment in line.segments() {
         current_distance += segment.length_km();
-        let field_strength = calc_field_strength_for_line_at_km(line, current_distance)?;
+        let field_strength = calc_field_strength_for_line_at_km(line, current_distance).with_context(||format!("While searching for min and max distance, could not calculate field strength at {current_distance} km for line {line:?}."))?;
         if field_strength > upper_bound {
             min_distance = current_distance;
         } else if field_strength <= upper_bound {
@@ -77,7 +94,7 @@ pub fn find_max_distance_for_line(
         }
     }
     if max_distance == 0.0 {
-        return Err(format!("The distance where the minimum field strength value is at is greater than the length of {min_distance} km of line {line:?}.").into());
+        bail!("The distance where the minimum field strength value is at is greater than the length of {min_distance} km of line {line:?}.");
     }
 
     // Ideally we could use the bisection method/binary search here, but Millington's method can produce unpredictable results.
@@ -88,7 +105,7 @@ pub fn find_max_distance_for_line(
     loop {
         let new_distance = current_distance + step;
         let field_strength = if new_distance < max_distance {
-            calc_field_strength_for_line_at_km(line, new_distance)?
+            calc_field_strength_for_line_at_km(line, new_distance).with_context(|| format!("While linearly searching, could not calculate field strength for distance {new_distance} km in line {line:?}"))?
         } else {
             f64::NEG_INFINITY
         };
@@ -96,7 +113,6 @@ pub fn find_max_distance_for_line(
             max_distance = new_distance;
             step *= 0.125; // Division by 8. This means that it will take 8 iterations to get to the new maximum distance.
             if step < MINIMUM_STEP {
-                println!("Returning because the step was too small. Last field strength was {field_strength} dB(uV)/m.");
                 return Ok(current_distance); // As a last resort, while it may be out of the set bounds, return the last valid value.
             }
         } else if field_strength <= upper_bound && lower_bound <= field_strength {
