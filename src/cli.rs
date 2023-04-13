@@ -12,9 +12,9 @@ pub struct Cli {
     /// Minimum usable field strength in dB(uV)/m.
     pub min_field_strength: f64,
 
-    //// Input json file as described in the README or other sources.
-    // #[arg(value_parser = parse_input_path)]
-    // pub input_file: PathBuf,
+    /// Input csv file.
+    #[arg(value_parser = parse_input_path)]
+    pub input_file: Option<PathBuf>,
 
     // #[arg(value_parser = parse_output_path)]
     // pub output_file: Option<PathBuf>,
