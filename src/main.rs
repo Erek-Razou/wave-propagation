@@ -92,7 +92,7 @@ fn find_distance_for_hardcoded_line(min_e: f64) -> Result<()> {
         &line,
         max_distance as f32,
         field_strength_at_max_distance as f32,
-        1.0,
+        0.5,
     );
     if let Err(error) = plot_result {
         println!("Error making chart: {error:#}")
