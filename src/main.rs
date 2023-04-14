@@ -19,17 +19,17 @@ fn main() -> Result<()> {
     let min_e = cli.min_field_strength;
     match cli.input_file {
         Some(path) => {
-            find_distances_for_input_file(min_e, &path)?;
+            find_distances_for_input_file(min_e, &path, !cli.no_plot)?;
         }
         None => {
-            find_distance_for_hardcoded_line(min_e)?;
+            find_distance_for_hardcoded_line(min_e, !cli.no_plot)?;
         }
     }
 
     Ok(())
 }
 
-fn find_distances_for_input_file(min_e: f64, input_file: &Path) -> Result<()> {
+fn find_distances_for_input_file(min_e: f64, input_file: &Path, plot: bool) -> Result<()> {
     let lines = file::read(input_file)?;
     let results: Vec<_> = lines
         .par_iter()
@@ -59,21 +59,26 @@ fn find_distances_for_input_file(min_e: f64, input_file: &Path) -> Result<()> {
             calc_field_strength_for_line_at_km(&lines[i], max_distance)
                 .expect("It was already calculated, should compute again.");
         println!("Field strength: {field_strength_at_max_distance} dB(uV)/m");
-        let plot_result = plot::line_with_divider(
-            &lines[i],
-            max_distance as f32,
-            field_strength_at_max_distance as f32,
-            0.5,
-        );
-        if let Err(error) = plot_result {
-            println!("Error plotting graph: {error:#}");
+
+        if plot {
+            let plot_result = plot::line_with_divider(
+                &lines[i],
+                max_distance as f32,
+                field_strength_at_max_distance as f32,
+                0.5,
+            );
+            if let Err(error) = plot_result {
+                println!("Error plotting graph: {error:#}");
+            }
+        } else {
+            println!()
         }
     }
 
     Ok(())
 }
 
-fn find_distance_for_hardcoded_line(min_e: f64) -> Result<()> {
+fn find_distance_for_hardcoded_line(min_e: f64, plot: bool) -> Result<()> {
     let segments = [
         LineSegment::with_length(Terrain::Ground.parameters(), 200.0),
         // LineSegment::with_length(Terrain::Sea.parameters(), 100.0),
@@ -86,14 +91,20 @@ fn find_distance_for_hardcoded_line(min_e: f64) -> Result<()> {
     let field_strength_at_max_distance = calc_field_strength_for_line_at_km(&line, max_distance)
         .expect("It was already calculated, should compute again.");
     println!("Field strength: {field_strength_at_max_distance} dB(uV)/m");
-    let plot_result = plot::line_with_divider(
-        &line,
-        max_distance as f32,
-        field_strength_at_max_distance as f32,
-        0.5,
-    );
-    if let Err(error) = plot_result {
-        println!("Error making chart: {error:#}");
+
+    if plot {
+        let plot_result = plot::line_with_divider(
+            &line,
+            max_distance as f32,
+            field_strength_at_max_distance as f32,
+            0.5,
+        );
+        if let Err(error) = plot_result {
+            println!("Error making chart: {error:#}");
+        }
+    } else {
+        println!()
     }
+
     Ok(())
 }

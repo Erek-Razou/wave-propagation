@@ -18,6 +18,10 @@ pub struct Cli {
 
     // #[arg(value_parser = parse_output_path)]
     // pub output_file: Option<PathBuf>,
+
+    /// Disables plotting of every result.
+    #[arg(long)]
+    pub no_plot: bool,
 }
 
 fn parse_input_path(input: &str) -> Result<PathBuf, String> {
