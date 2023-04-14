@@ -70,7 +70,7 @@ pub fn calc_field_strength_for_line_at_km(line: &Line, distance: f64) -> Result<
 /// A result of either the maximum distance in km where the field strength doesn't fall below the minimum or an error.
 pub fn find_max_distance_for_line(min_usable_field_strength: f64, line: &Line) -> Result<f64> {
     const FIELD_STRENGTH_DB_TOLERANCE: f64 = 0.0001;
-    const MINIMUM_STEP: f64 = 0.0001; // An accuracy of 10 cm should be way more than enough given how approximated the results of LFMF are
+    const MINIMUM_STEP: f64 = 0.001; // An accuracy of 1 m should be enough given how approximated the results of LFMF are and is inline with it's minimum distance.
     let upper_bound = min_usable_field_strength + FIELD_STRENGTH_DB_TOLERANCE;
     let lower_bound = min_usable_field_strength;
 
