@@ -79,5 +79,5 @@ fn parse_to_line(file_line: &str) -> Result<Line> {
 }
 
 fn px_to_km(px: f64) -> f64 {
-    px * 254.0 / 200.0
+    (px / 254.0) * 200.0
 }
