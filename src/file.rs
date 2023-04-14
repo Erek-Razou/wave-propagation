@@ -1,7 +1,6 @@
 use crate::terrain::defaults::Terrain;
 use crate::terrain::{Line, LineSegment};
 use anyhow::{ensure, Context, Result};
-use std::fmt::format;
 use std::path::Path;
 
 pub fn read(path: &Path) -> Result<Vec<Line>> {
@@ -29,14 +28,13 @@ fn parse_to_line(file_line: &str) -> Result<Line> {
     let border_column = columns
         .next()
         .context("There was no 2nd column (end distance/border).")?;
-    let end_km_distance = match border_column.is_empty() {
-        true => None,
-        false => {
-            let end_px_distance = border_column
-                .parse()
-                .context("Could not parse 2nd column (end distance/border) to float.")?;
-            Some(px_to_km(end_px_distance))
-        }
+    let end_km_distance = if border_column.is_empty() {
+        None
+    } else {
+        let end_px_distance = border_column
+            .parse()
+            .context("Could not parse 2nd column (end distance/border) to float.")?;
+        Some(px_to_km(end_px_distance))
     };
 
     // The start from the 4th column and measure all the segment distances.

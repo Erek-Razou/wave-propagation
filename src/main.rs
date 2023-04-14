@@ -1,11 +1,9 @@
 use crate::find_max_distance::{calc_field_strength_for_line_at_km, find_max_distance_for_line};
 use crate::terrain::defaults::Terrain;
 use crate::terrain::{Line, LineSegment};
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, Result};
 use rayon::prelude::*;
 use std::path::Path;
-use std::result;
-use textplots::{Chart, Plot, Shape};
 mod cli;
 mod file;
 mod find_max_distance;
@@ -77,9 +75,9 @@ fn find_distances_for_input_file(min_e: f64, input_file: &Path) -> Result<()> {
 
 fn find_distance_for_hardcoded_line(min_e: f64) -> Result<()> {
     let segments = [
-        LineSegment::with_length(Terrain::Ground.parameters(), 20.0),
-        LineSegment::with_length(Terrain::Sea.parameters(), 100.0),
-        LineSegment::with_length(Terrain::Ground.parameters(), 280.0),
+        LineSegment::with_length(Terrain::Ground.parameters(), 200.0),
+        // LineSegment::with_length(Terrain::Sea.parameters(), 100.0),
+        // LineSegment::with_length(Terrain::Ground.parameters(), 280.0),
     ];
     let line = Line::with_segments(0.0, segments);
 
@@ -95,7 +93,7 @@ fn find_distance_for_hardcoded_line(min_e: f64) -> Result<()> {
         0.5,
     );
     if let Err(error) = plot_result {
-        println!("Error making chart: {error:#}")
+        println!("Error making chart: {error:#}");
     }
     Ok(())
 }
