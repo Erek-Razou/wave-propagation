@@ -16,7 +16,7 @@ mod terrain;
 fn main() -> Result<()> {
     let cli = cli::parse();
 
-    println!("Hello, world!");
+    print!("Hello, world!\n\n");
 
     let min_e = cli.min_field_strength;
     match cli.input_file {
