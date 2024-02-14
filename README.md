@@ -1,6 +1,6 @@
 # Determining the radio coverage area of a digital DRM transmitter in the Greek territory
 
-This the work folder of a university assignment that tasked us, Ermina Trontzou and Maciej Ratkiewicz, with calculating the expected terrestial coverage of a hypothetical DRM (Digital Radio Mondiale) transmitter located in Larissa, Greece.
+This the work folder of a university assignment that tasked us, [Ermina Trontzou](https://github.com/ErminaTrontzou/) and [Maciej Ratkiewicz](https://github.com/MaciejRtk95/), with calculating the expected terrestial coverage of a hypothetical DRM (Digital Radio Mondiale) transmitter located in Larissa, Greece.
 
 ![resulting coverage map](https://github.com/Erek-Razou/wave-propagation/blob/main/coverage.png)
 _The resulting coverage map for our parameters_
